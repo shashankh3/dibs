@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAnyd_PX0TRHTrBHwXjG5Chr8jf4Tieu8M",
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: "dibs-app-91806.firebaseapp.com",
   projectId: "dibs-app-91806",
   storageBucket: "dibs-app-91806.firebasestorage.app",

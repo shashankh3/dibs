@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, LogBox, Modal, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, LogBox, Modal, FlatList, Platform } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Feather, Ionicons } from '@expo/vector-icons';
@@ -330,7 +330,22 @@ export default function App() {
 }
 
 const getStyles = (theme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.background },
+  container: { 
+    flex: 1, 
+    backgroundColor: theme.background,
+    ...Platform.select({
+      web: {
+        maxWidth: 600,
+        width: '100%',
+        marginHorizontal: 'auto',
+        borderLeftWidth: 1,
+        borderRightWidth: 1,
+        borderColor: theme.border,
+        boxShadow: '0 0 20px rgba(0,0,0,0.1)'
+      },
+      default: {}
+    })
+  },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 10, paddingBottom: 15 },
   headerBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: theme.card, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: theme.border, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 4 },
 
