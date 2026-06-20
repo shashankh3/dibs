@@ -1,0 +1,5 @@
+- [/] Run `npx expo install firebase`
+- [ ] Create `firebaseConfig.js`
+- [ ] Update `components/AddItem.js`
+- [ ] Update `components/ChatBox.js`
+- [ ] Verify functionality and update walkthrough

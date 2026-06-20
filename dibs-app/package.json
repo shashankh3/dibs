@@ -1,0 +1,37 @@
+{
+  "name": "dibs-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "@expo/metro-runtime": "~56.0.15",
+    "@expo/vector-icons": "^15.1.1",
+    "expo": "~56.0.12",
+    "expo-fast-image": "^1.1.3",
+    "expo-haptics": "^56.0.3",
+    "expo-image-picker": "~56.0.18",
+    "expo-location": "^56.0.18",
+    "expo-status-bar": "~56.0.4",
+    "firebase": "^12.15.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.85.3",
+    "react-native-deck-swiper": "^2.0.19",
+    "react-native-gesture-handler": "~2.31.1",
+    "react-native-maps": "^1.27.2",
+    "react-native-reanimated": "4.3.1",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-web": "^0.21.2",
+    "react-native-webview": "13.16.1"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "private": true,
+  "devDependencies": {
+    "@expo/ngrok": "^4.1.3",
+    "babel-preset-expo": "^56.0.15"
+  }
+}
