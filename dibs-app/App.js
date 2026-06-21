@@ -170,6 +170,13 @@ function AppContent() {
         swipedIds: [],
         score: { items: 0, co2: 0, raddi: 0 }
       });
+
+      // Reset all items that were marked as raddi back to available so they appear in swiper again
+      const itemsToReset = items.filter(item => item.status === 'raddi' || item.status === 'sold');
+      await Promise.all(itemsToReset.map(item => {
+        return updateDoc(doc(db, 'items', item.id), { status: 'available' });
+      }));
+
     } catch (e) {
       console.error("Error resetting swipes: ", e);
     }
