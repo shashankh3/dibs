@@ -28,6 +28,7 @@ const Card = memo(forwardRef(({ data, depth, translateX, translateY, primaryColo
           { translateY: translateY.value },
           { rotate: `${rotate}deg` },
         ],
+        ...(Platform.OS === 'web' ? { willChange: 'transform' } : {})
       };
     }
 
@@ -52,6 +53,7 @@ const Card = memo(forwardRef(({ data, depth, translateX, translateY, primaryColo
     return {
       opacity: 0.99,
       transform: [{ scale }, { translateY: translateYVal }],
+      ...(Platform.OS === 'web' ? { willChange: 'transform' } : {})
     };
   });
 
@@ -146,7 +148,7 @@ function getStyles(primaryColor, cardBg) {
   return StyleSheet.create({
     placeholder: { height: height * 0.52, borderRadius: 24, backgroundColor: 'transparent' },
     cardContainer: { position: 'absolute', width: width - 30, height: height * 0.52, alignSelf: 'center' },
-    card: { height: '100%', borderRadius: 24, backgroundColor: cardBg, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 16 }, shadowOpacity: 0.25, shadowRadius: 30, elevation: 16 },
+    card: { height: '100%', borderRadius: 24, backgroundColor: cardBg, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 16 }, shadowOpacity: 0.25, shadowRadius: Platform.OS === 'web' ? 10 : 30, elevation: 16 },
     image: { width: '100%', height: '100%', position: 'absolute' },
     topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: 20 },
     distancePill: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.55)', paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, gap: 4 },
