@@ -50,8 +50,12 @@ function AppContent() {
       const validItems = dbItems;
 
       console.log("Fetched valid items from Firebase:", validItems.length);
-      // Sort so newest items appear first
-      setItems(validItems.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)));
+        // Sort so newest items appear first
+        setItems(validItems.sort((a, b) => {
+          const tA = typeof a.createdAt === 'number' ? a.createdAt : 0;
+          const tB = typeof b.createdAt === 'number' ? b.createdAt : 0;
+          return tB - tA;
+        }));
     });
     
     // Fetch persistent user state
@@ -64,17 +68,8 @@ function AppContent() {
     });
 
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Permission to access location was denied');
-        return;
-      }
-      try {
-        let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-        setUserLocation({ lat: location.coords.latitude, lng: location.coords.longitude });
-      } catch (e) {
-        console.log('Could not get location:', e);
-      }
+      // Mock location for web testing so new Pune items appear first
+      setUserLocation({ lat: 18.5196, lng: 73.8554 }); // Pune
     })();
 
     return () => {
