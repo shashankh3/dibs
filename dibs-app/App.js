@@ -22,6 +22,7 @@ import { db } from './firebaseConfig';
 LogBox.ignoreLogs(['The method `createDownloadResumable`']);
 LogBox.ignoreLogs(['createDownloadResumable']);
 LogBox.ignoreLogs(['getInfoAsync']);
+LogBox.ignoreLogs(['bloom filter', 'BloomFilter', 'Applying bloom filter failed']);
 
 const CURRENT_USER_ID = 'test-user-1';
 
