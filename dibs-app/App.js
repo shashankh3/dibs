@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Modal, FlatList, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Modal, FlatList, Platform, LogBox } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Feather, Ionicons } from '@expo/vector-icons';
@@ -18,6 +18,9 @@ import * as Haptics from 'expo-haptics';
 import * as Location from 'expo-location';
 import { collection, query, onSnapshot, addDoc, deleteDoc, doc, updateDoc, increment, setDoc, arrayUnion } from 'firebase/firestore';
 import { db } from './firebaseConfig';
+
+LogBox.ignoreLogs(['The method `createDownloadResumable`']);
+LogBox.ignoreLogs(['createDownloadResumable']);
 
 const CURRENT_USER_ID = 'test-user-1';
 
