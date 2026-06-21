@@ -235,7 +235,7 @@ function AppContent() {
 
       {/* Top Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.logoContainer} onPress={() => setActiveTab('leaderboard')} activeOpacity={0.7}>
+        <TouchableOpacity style={styles.logoContainer} onPress={() => setActiveTab('leaderboard')} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="View Leaderboard">
           <Text style={styles.logoText}>dibs</Text>
           <View style={styles.logoDot} />
           {userScore.co2 > 0 && (
@@ -244,10 +244,10 @@ function AppContent() {
         </TouchableOpacity>
 
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          <TouchableOpacity style={styles.headerBtn} onPress={toggleTheme}>
+          <TouchableOpacity style={styles.headerBtn} onPress={toggleTheme} accessibilityRole="button" accessibilityLabel="Toggle Theme">
             <Feather name={isDarkMode ? "sun" : "moon"} size={20} color={theme.text} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerBtn} onPress={() => setShowLangModal(true)}>
+          <TouchableOpacity style={styles.headerBtn} onPress={() => setShowLangModal(true)} accessibilityRole="button" accessibilityLabel="Change Language">
             <Feather name="globe" size={20} color={theme.text} />
           </TouchableOpacity>
         </View>

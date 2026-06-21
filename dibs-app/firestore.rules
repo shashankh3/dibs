@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Only allow authenticated users to read and write items
+    match /items/{document=**} {
+      allow read: if true; // Public marketplace
+      allow create: if request.auth != null; // Only logged in users can create
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId; // Only owner can edit
+    }
+    
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
