@@ -21,6 +21,7 @@ import { db } from './firebaseConfig';
 
 LogBox.ignoreLogs(['The method `createDownloadResumable`']);
 LogBox.ignoreLogs(['createDownloadResumable']);
+LogBox.ignoreLogs(['getInfoAsync']);
 
 const CURRENT_USER_ID = 'test-user-1';
 
