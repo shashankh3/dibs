@@ -45,10 +45,12 @@ export default function KabadiwalaDirectory() {
             onChangeText={setSearchPin}
             maxLength={6}
             onSubmitEditing={searchOnGoogleMaps}
+            accessibilityLabel="Pincode search input"
+            accessibilityHint="Enter your pincode to find local Kabadiwalas"
           />
         </View>
 
-        <TouchableOpacity style={styles.searchBtn} onPress={searchOnGoogleMaps}>
+        <TouchableOpacity style={styles.searchBtn} onPress={searchOnGoogleMaps} accessibilityRole="button" accessibilityLabel="Search for Kabadiwalas on Google Maps">
           <Feather name="navigation" size={20} color="#000" />
           <Text style={styles.searchBtnText}>Search on Google Maps</Text>
         </TouchableOpacity>

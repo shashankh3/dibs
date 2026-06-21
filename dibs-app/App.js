@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, LogBox, Modal, FlatList, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Modal, FlatList, Platform } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Feather, Ionicons } from '@expo/vector-icons';
@@ -19,7 +19,7 @@ import * as Location from 'expo-location';
 import { collection, query, onSnapshot, addDoc, deleteDoc, doc, updateDoc, increment, setDoc, arrayUnion } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 
-LogBox.ignoreAllLogs(true);
+const CURRENT_USER_ID = 'test-user-1';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('swipe');
@@ -28,7 +28,6 @@ function AppContent() {
   const [userScore, setUserScore] = useState({ items: 0, co2: 0, raddi: 0 });
   const [swipedIds, setSwipedIds] = useState(new Set());
   const [userLocation, setUserLocation] = useState(null);
-  const [radius, setRadius] = useState(5);
   const [showLangModal, setShowLangModal] = useState(false);
   const [notification, setNotification] = useState(null);
 
@@ -52,7 +51,7 @@ function AppContent() {
     });
     
     // Fetch persistent user state
-    const unsubUser = onSnapshot(doc(db, 'users', 'test-user-1'), docSnap => {
+    const unsubUser = onSnapshot(doc(db, 'users', CURRENT_USER_ID), docSnap => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         if (data.score) setUserScore(data.score);
@@ -93,14 +92,14 @@ function AppContent() {
       const itemRef = doc(db, 'items', item.id);
       await updateDoc(itemRef, { dibsCount: increment(1) });
 
-      const userRef = doc(db, 'users', 'test-user-1');
+      const userRef = doc(db, 'users', CURRENT_USER_ID);
       await updateDoc(userRef, {
         'score.items': increment(1),
         'score.co2': increment(item.co2 || 0),
         swipedIds: arrayUnion(item.id)
       });
 
-      const buyerId = 'test-user-1';
+      const buyerId = CURRENT_USER_ID;
       const sellerId = item.userId || 'unknown-seller';
       const chatId = `${item.id}_${buyerId}`;
       const chatRef = doc(db, 'chats', chatId);
@@ -141,7 +140,7 @@ function AppContent() {
       const itemRef = doc(db, 'items', item.id);
       await updateDoc(itemRef, { status: 'raddi' });
 
-      const userRef = doc(db, 'users', 'test-user-1');
+      const userRef = doc(db, 'users', CURRENT_USER_ID);
       await updateDoc(userRef, {
         'score.raddi': increment(5),
         swipedIds: arrayUnion(item.id)
@@ -154,7 +153,7 @@ function AppContent() {
   const handlePass = async (item) => {
     if (!item || !item.id) return;
     try {
-      const userRef = doc(db, 'users', 'test-user-1');
+      const userRef = doc(db, 'users', CURRENT_USER_ID);
       await updateDoc(userRef, {
         swipedIds: arrayUnion(item.id)
       });
@@ -166,7 +165,7 @@ function AppContent() {
   const handleResetSwipes = async () => {
     try {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      const userRef = doc(db, 'users', 'test-user-1');
+      const userRef = doc(db, 'users', CURRENT_USER_ID);
       await updateDoc(userRef, { 
         swipedIds: [],
         score: { items: 0, co2: 0, raddi: 0 }
@@ -213,7 +212,7 @@ function AppContent() {
       case 'add': return <AddItem onAddSuccess={() => setActiveTab('swipe')} onAddItem={handleAddItem} />;
       case 'listings': return <MyListings items={items} onRemoveItem={handleRemoveItem} onMarkSold={handleMarkSold} />;
       case 'scrap': return <ScrapRoute items={items} />;
-      case 'chats': return <ChatBox currentUserId="test-user-1" />;
+      case 'chats': return <ChatBox currentUserId={CURRENT_USER_ID} />;
       case 'directory': return <KabadiwalaDirectory />;
       case 'leaderboard': return <Leaderboard />;
       default: return <SwipeBoard items={items} swipedIds={swipedIds} userLocation={userLocation} onDibs={handleDibs} onRaddi={handleRaddi} onPass={handlePass} onReset={handleResetSwipes} />;
@@ -257,7 +256,15 @@ function AppContent() {
       <View style={styles.subHeader}>
         <View style={styles.tabContainer}>
           {['swipe', 'add', 'listings', 'scrap', 'chats', 'directory'].map(tab => (
-            <TouchableOpacity key={tab} style={[styles.tab, activeTab === tab && styles.activeTab]} onPress={() => switchTab(tab)} activeOpacity={0.7}>
+            <TouchableOpacity 
+              key={tab} 
+              style={[styles.tab, activeTab === tab && styles.activeTab]} 
+              onPress={() => switchTab(tab)} 
+              activeOpacity={0.7}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: activeTab === tab }}
+              accessibilityLabel={`Tab ${tab}`}
+            >
               <Feather name={
                 tab === 'swipe' ? 'layers' :
                   tab === 'add' ? 'plus-square' :
@@ -271,7 +278,7 @@ function AppContent() {
 
         {/* Inline Notification overlays the tab container perfectly */}
         {notification && (
-          <View style={styles.notificationBanner}>
+          <View style={styles.notificationBanner} accessibilityLiveRegion="polite">
             <View style={styles.notifIconContainer}>
               <Ionicons name="leaf" size={16} color="#000" />
             </View>

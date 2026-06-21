@@ -148,7 +148,7 @@ export default function ChatBox({ currentUserId = 'test-user-1' }) {
     return (
       <KeyboardAvoidingView style={styles.container} behavior="padding" keyboardVerticalOffset={Platform.OS === 'android' ? 25 : 0}>
         <View style={styles.chatHeader}>
-          <TouchableOpacity onPress={() => setActiveChat(null)} style={{ padding: 5 }}>
+          <TouchableOpacity onPress={() => setActiveChat(null)} style={{ padding: 5 }} accessibilityRole="button" accessibilityLabel="Go back to chat list">
             <Feather name="chevron-left" size={28} color={theme.text} />
           </TouchableOpacity>
           <Image source={{ uri: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(otherName || 'User') }} style={styles.chatAvatar} />
@@ -184,8 +184,10 @@ export default function ChatBox({ currentUserId = 'test-user-1' }) {
             placeholderTextColor={theme.subText}
             value={msgInput}
             onChangeText={setMsgInput}
+            accessibilityLabel="Message input"
+            accessibilityHint="Type your message here"
           />
-          <TouchableOpacity style={styles.sendBtn} onPress={sendMessage}>
+          <TouchableOpacity style={styles.sendBtn} onPress={sendMessage} accessibilityRole="button" accessibilityLabel="Send message">
             <Feather name="send" size={20} color="#000" />
           </TouchableOpacity>
         </View>
@@ -221,6 +223,8 @@ export default function ChatBox({ currentUserId = 'test-user-1' }) {
               style={styles.chatCard} 
               onPress={() => setActiveChat(item)}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={`Chat with ${otherName} about ${item.itemTitle}`}
             >
               <View style={styles.avatarContainer}>
                 {/* Large circle is now the Item Image */}
@@ -240,6 +244,8 @@ export default function ChatBox({ currentUserId = 'test-user-1' }) {
               <TouchableOpacity 
                 style={styles.deleteChatBtn} 
                 onPress={() => deleteChat(item.id)}
+                accessibilityRole="button"
+                accessibilityLabel={`Delete chat with ${otherName}`}
               >
                 <Feather name="trash-2" size={20} color="#EF4444" />
               </TouchableOpacity>

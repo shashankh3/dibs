@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert, Image, Modal, ActivityIndicator } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -24,6 +24,16 @@ export default function AddItem({ onAddSuccess, onAddItem }) {
   const [selectedLng, setSelectedLng] = useState(null);
   const [isGeocoding, setIsGeocoding] = useState(false);
 
+  const handleMapMessage = useCallback((event) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      if (data.lat && data.lng) {
+        setTempLat(data.lat);
+        setTempLng(data.lng);
+      }
+    } catch (e) { /* Ignore non-JSON messages */ }
+  }, []);
+
   useEffect(() => {
     if (Platform.OS !== 'web') return;
     const listener = (event) => {
@@ -33,19 +43,28 @@ export default function AddItem({ onAddSuccess, onAddItem }) {
         if (data && data.lat && data.lng) {
           handleMapMessage({ nativeEvent: { data: event.data } });
         }
-      } catch (e) {}
+      } catch (e) { /* Ignore non-JSON messages */ }
     };
     window.addEventListener('message', listener);
     return () => window.removeEventListener('message', listener);
-  }, []);
+  }, [handleMapMessage]);
   
   const { t } = useLanguage();
   const { theme } = useTheme();
   const styles = getStyles(theme);
 
   const handleSubmit = async () => {
-    if (!title || !price || !address || !pincode) {
-      Alert.alert('Missing Fields', 'Please fill in all the details.');
+    const trimmedTitle = title.trim();
+    const trimmedAddress = address.trim();
+    const cleanPrice = price.replace(/[^0-9.]/g, '');
+    const cleanPincode = pincode.replace(/[^0-9]/g, '');
+
+    if (!trimmedTitle || !cleanPrice || !trimmedAddress || !cleanPincode) {
+      Alert.alert('Invalid Fields', 'Please provide valid information for all fields.');
+      return;
+    }
+    if (cleanPincode.length < 4) {
+      Alert.alert('Invalid Pincode', 'Please provide a valid pincode.');
       return;
     }
     if (!imageUri) {
@@ -86,11 +105,11 @@ export default function AddItem({ onAddSuccess, onAddItem }) {
 
     if (onAddItem) {
       onAddItem({
-        titleKey: title,
-        title: title, 
-        price: price ? `₹${price}` : 'Free',
-        address: address,
-        pincode: pincode,
+        titleKey: trimmedTitle,
+        title: trimmedTitle, 
+        price: cleanPrice ? `₹${cleanPrice}` : 'Free',
+        address: trimmedAddress,
+        pincode: cleanPincode,
         lat: selectedLat, // Exact coordinates from map picker
         lng: selectedLng,
         distance: '0km',
@@ -100,7 +119,7 @@ export default function AddItem({ onAddSuccess, onAddItem }) {
         image: imageUri,
         dibsCount: 0,
         status: 'available',
-        userId: 'test-user-1'
+        userId: 'test-user-1' // Wait, App.js is the one inserting to firebase. Actually this is passed up.
       });
     }
 
@@ -154,15 +173,8 @@ export default function AddItem({ onAddSuccess, onAddItem }) {
     }
   };
 
-  const handleMapMessage = (event) => {
-    try {
-      const data = JSON.parse(event.nativeEvent.data);
-      if (data.lat && data.lng) {
-        setTempLat(data.lat);
-        setTempLng(data.lng);
-      }
-    } catch (e) {}
-  };
+
+
 
   const mapHtml = `
     <!DOCTYPE html>
@@ -228,7 +240,13 @@ export default function AddItem({ onAddSuccess, onAddItem }) {
         <Text style={styles.headerTitle}>{t('listAnItem') || 'List an Item'}</Text>
         <Text style={styles.subText}>{t('saveItemsLandfill') || 'Help save items from the landfill'}</Text>
 
-        <TouchableOpacity style={styles.photoUpload} onPress={takePhoto}>
+        <TouchableOpacity 
+          style={styles.photoUpload} 
+          onPress={takePhoto}
+          accessibilityRole="button"
+          accessibilityLabel={t('tapToAddPhoto') || 'Tap to add photo'}
+          accessibilityHint="Opens camera to take a photo of the item"
+        >
           {imageUri ? (
             <Image source={{ uri: imageUri }} style={styles.previewImage} />
           ) : (
@@ -248,6 +266,7 @@ export default function AddItem({ onAddSuccess, onAddItem }) {
               placeholderTextColor={theme.subText}
               value={title}
               onChangeText={setTitle}
+              accessibilityLabel="Item Title Input"
             />
           </View>
 
@@ -260,6 +279,7 @@ export default function AddItem({ onAddSuccess, onAddItem }) {
               keyboardType="numeric"
               value={price}
               onChangeText={setPrice}
+              accessibilityLabel="Item Price Input"
             />
           </View>
 
@@ -268,6 +288,9 @@ export default function AddItem({ onAddSuccess, onAddItem }) {
             <TouchableOpacity 
               style={condition === 'new' ? styles.conditionBtnActive : styles.conditionBtn}
               onPress={() => setCondition('new')}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: condition === 'new' }}
+              accessibilityLabel="Condition New"
             >
               <Text style={condition === 'new' ? styles.conditionBtnTextActive : styles.conditionBtnText}>
                 {t('new') || 'New'}
@@ -276,6 +299,9 @@ export default function AddItem({ onAddSuccess, onAddItem }) {
             <TouchableOpacity 
               style={condition === 'used' ? styles.conditionBtnActive : styles.conditionBtn}
               onPress={() => setCondition('used')}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: condition === 'used' }}
+              accessibilityLabel="Condition Used"
             >
               <Text style={condition === 'used' ? styles.conditionBtnTextActive : styles.conditionBtnText}>
                 {t('used') || 'Used'}
@@ -302,6 +328,7 @@ export default function AddItem({ onAddSuccess, onAddItem }) {
                 value={address}
                 onChangeText={setAddress}
                 multiline
+                accessibilityLabel="Address Input"
               />
             )}
           </View>
@@ -316,11 +343,17 @@ export default function AddItem({ onAddSuccess, onAddItem }) {
               maxLength={6}
               value={pincode}
               onChangeText={setPincode}
+              accessibilityLabel="Pincode Input"
             />
           </View>
         </View>
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <TouchableOpacity 
+          style={styles.submitButton} 
+          onPress={handleSubmit}
+          accessibilityRole="button"
+          accessibilityLabel="Submit Listing"
+        >
           <Feather name="check" size={24} color="#000" />
           <Text style={styles.submitButtonText}>{t('submitListing') || 'Submit Listing'}</Text>
         </TouchableOpacity>

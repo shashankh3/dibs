@@ -53,7 +53,7 @@ export default function MyListings({ items = [], onRemoveItem, onMarkSold }) {
       </View>
       <View style={styles.actionsRow}>
         {item.status !== 'sold' ? (
-          <TouchableOpacity style={styles.soldBtn} onPress={() => markSold(item)}>
+          <TouchableOpacity style={styles.soldBtn} onPress={() => markSold(item)} accessibilityRole="button" accessibilityLabel={`Mark ${item.title} as sold`}>
             <Feather name="check" size={18} color="#000" />
             <Text style={styles.actionText}>{t('markSold') || 'Sold'}</Text>
           </TouchableOpacity>
@@ -63,7 +63,7 @@ export default function MyListings({ items = [], onRemoveItem, onMarkSold }) {
             <Text style={[styles.actionText, { color: theme.subText }]}>Sold Out</Text>
           </View>
         )}
-        <TouchableOpacity style={styles.deleteBtn} onPress={() => deleteItem(item)}>
+        <TouchableOpacity style={styles.deleteBtn} onPress={() => deleteItem(item)} accessibilityRole="button" accessibilityLabel={`Delete ${item.title}`}>
           <Feather name="trash-2" size={18} color="#fff" />
           <Text style={[styles.actionText, { color: '#fff' }]}>{t('delete') || 'Delete'}</Text>
         </TouchableOpacity>

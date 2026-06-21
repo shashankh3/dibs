@@ -171,6 +171,8 @@ export default function SwipeBoard({ items = [], swipedIds = new Set(), userLoca
                 setTrigger(t => t + 1);
                 onReset();
               }}
+              accessibilityRole="button"
+              accessibilityLabel={t('refreshDeck') || 'Refresh Deck'}
             >
               <Feather name="rotate-ccw" size={18} color="#000" />
               <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 16 }}>Refresh Deck</Text>
@@ -221,15 +223,33 @@ export default function SwipeBoard({ items = [], swipedIds = new Set(), userLoca
         {cardTree}
       </View>
       <View style={styles.buttonPillContainer}>
-        <TouchableOpacity style={styles.pillButton} onPress={() => forceSwipe('left')} activeOpacity={0.6}>
+        <TouchableOpacity 
+          style={styles.pillButton} 
+          onPress={() => forceSwipe('left')} 
+          activeOpacity={0.6}
+          accessibilityRole="button"
+          accessibilityLabel="Pass"
+        >
           <Feather name="x" size={26} color="#EF4444" />
         </TouchableOpacity>
         <View style={styles.pillDivider} />
-        <TouchableOpacity style={styles.pillButton} onPress={() => forceSwipe('bottom')} activeOpacity={0.6}>
+        <TouchableOpacity 
+          style={styles.pillButton} 
+          onPress={() => forceSwipe('bottom')} 
+          activeOpacity={0.6}
+          accessibilityRole="button"
+          accessibilityLabel="Raddi"
+        >
           <Feather name="trash-2" size={22} color={theme.subText} />
         </TouchableOpacity>
         <View style={styles.pillDivider} />
-        <TouchableOpacity style={styles.pillButton} onPress={() => forceSwipe('right')} activeOpacity={0.6}>
+        <TouchableOpacity 
+          style={styles.pillButton} 
+          onPress={() => forceSwipe('right')} 
+          activeOpacity={0.6}
+          accessibilityRole="button"
+          accessibilityLabel="Dibs"
+        >
           <Feather name="heart" size={26} color={theme.primary} />
         </TouchableOpacity>
       </View>

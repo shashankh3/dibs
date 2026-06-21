@@ -100,13 +100,13 @@ export default function EntryPage({ onEnter }) {
       {/* Static Footer */}
       <View style={styles.footer}>
         {currentIndex === slides.length - 1 ? (
-          <TouchableOpacity style={styles.getStartedBtn} onPress={handleEnter} activeOpacity={0.8}>
+          <TouchableOpacity style={styles.getStartedBtn} onPress={handleEnter} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Get Started">
             <Text style={styles.btnText}>Get Started</Text>
             <Feather name="arrow-right" size={22} color="#000" />
           </TouchableOpacity>
         ) : (
           <View style={styles.footerControls}>
-            <TouchableOpacity onPress={handleEnter} activeOpacity={0.6} style={styles.skipBtn}>
+            <TouchableOpacity onPress={handleEnter} activeOpacity={0.6} style={styles.skipBtn} accessibilityRole="button" accessibilityLabel="Skip introduction">
               <Text style={styles.skipText}>Skip</Text>
             </TouchableOpacity>
 
@@ -122,7 +122,7 @@ export default function EntryPage({ onEnter }) {
               ))}
             </View>
 
-            <TouchableOpacity style={styles.iconNextBtn} onPress={handleNext} activeOpacity={0.8}>
+            <TouchableOpacity style={styles.iconNextBtn} onPress={handleNext} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Next slide">
               <Feather name="arrow-right" size={24} color="#000" />
             </TouchableOpacity>
           </View>
