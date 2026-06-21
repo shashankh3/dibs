@@ -12,6 +12,11 @@
     "android": {
       "package": "com.anonymous.dibsapp",
       "softwareKeyboardLayoutMode": "pan"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d8c47a66-3e57-48b0-91be-03efaf886af6"
+      }
     }
   }
 }

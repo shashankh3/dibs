@@ -44,6 +44,7 @@ export default function KabadiwalaDirectory() {
             value={searchPin}
             onChangeText={setSearchPin}
             maxLength={6}
+            onSubmitEditing={searchOnGoogleMaps}
           />
         </View>
 

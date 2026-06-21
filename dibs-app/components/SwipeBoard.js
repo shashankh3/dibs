@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Dimensions, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Dimensions, Image, Platform } from 'react-native';
 import { GestureDetector, Gesture, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -14,7 +14,9 @@ import { useLanguage } from '../LanguageContext';
 import { useTheme } from '../ThemeContext';
 import { getPincodeCoords, getDistanceKm } from '../utils/locationUtils';
 
-const { width, height } = Dimensions.get('window');
+const windowDimensions = Dimensions.get('window');
+const width = Platform.OS === 'web' ? Math.min(windowDimensions.width, 400) : windowDimensions.width;
+const height = Platform.OS === 'web' ? Math.min(windowDimensions.height, 850) : windowDimensions.height;
 const SWIPE_THRESHOLD = width * 0.3;
 const SWIPE_OUT_DURATION = 250;
 

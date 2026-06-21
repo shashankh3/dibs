@@ -95,6 +95,18 @@ export default function ChatBox({ currentUserId = 'test-user-1' }) {
   };
 
   const deleteChat = (chatId) => {
+    if (Platform.OS === 'web') {
+      const result = window.confirm(t('deleteChatConfirm') || 'Are you sure you want to delete this chat?');
+      if (result) {
+        try {
+          deleteDoc(doc(db, 'chats', chatId));
+        } catch (e) {
+          console.error("Error deleting chat:", e);
+        }
+      }
+      return;
+    }
+
     Alert.alert(
       t('deleteChat') || 'Delete Chat',
       t('deleteChatConfirm') || 'Are you sure you want to delete this chat?',

@@ -1,11 +1,13 @@
 import React, { memo, useMemo, forwardRef } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Platform } from 'react-native';
 import Animated, { useAnimatedStyle, interpolate, Extrapolation } from 'react-native-reanimated';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import FastImage from 'expo-fast-image';
 import { useLanguage } from '../LanguageContext';
 
-const { width, height } = Dimensions.get('window');
+const windowDimensions = Dimensions.get('window');
+const width = Platform.OS === 'web' ? Math.min(windowDimensions.width, 400) : windowDimensions.width;
+const height = Platform.OS === 'web' ? Math.min(windowDimensions.height, 850) : windowDimensions.height;
 
 const Card = memo(forwardRef(({ data, depth, translateX, translateY, primaryColor, cardBg }, ref) => {
   const { t } = useLanguage();

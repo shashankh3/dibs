@@ -291,7 +291,7 @@ function AppContent() {
       {/* Language Modal */}
       <Modal visible={showLangModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, Platform.OS === 'web' && { maxWidth: 400, width: '100%', alignSelf: 'center' }]}>
             <Text style={styles.modalTitle}>{t('selectLanguage') || 'Select Language'}</Text>
             <FlatList
               data={availableLangs}
@@ -316,16 +316,19 @@ function AppContent() {
 }
 
 export default function App() {
+  const isWeb = Platform.OS === 'web';
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
-        <LanguageProvider>
-          <SafeAreaProvider>
-            <AppContent />
-          </SafeAreaProvider>
-        </LanguageProvider>
-      </ThemeProvider>
-    </GestureHandlerRootView>
+    <View style={isWeb ? { flex: 1, backgroundColor: '#111', alignItems: 'center', justifyContent: 'center' } : { flex: 1 }}>
+      <GestureHandlerRootView style={isWeb ? { flex: 1, width: '100%', maxWidth: 400, maxHeight: 850, overflow: 'hidden', borderRadius: 30, boxShadow: '0 0 30px rgba(0,0,0,0.5)' } : { flex: 1 }}>
+        <ThemeProvider>
+          <LanguageProvider>
+            <SafeAreaProvider>
+              <AppContent />
+            </SafeAreaProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+      </GestureHandlerRootView>
+    </View>
   );
 }
 
@@ -333,18 +336,6 @@ const getStyles = (theme) => StyleSheet.create({
   container: { 
     flex: 1, 
     backgroundColor: theme.background,
-    ...Platform.select({
-      web: {
-        maxWidth: 600,
-        width: '100%',
-        marginHorizontal: 'auto',
-        borderLeftWidth: 1,
-        borderRightWidth: 1,
-        borderColor: theme.border,
-        boxShadow: '0 0 20px rgba(0,0,0,0.1)'
-      },
-      default: {}
-    })
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 10, paddingBottom: 15 },
   headerBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: theme.card, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: theme.border, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 4 },
@@ -354,7 +345,7 @@ const getStyles = (theme) => StyleSheet.create({
   logoDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: theme.primary, marginBottom: 2, marginLeft: 2 },
   co2Text: { color: theme.subText, fontSize: 13, fontWeight: '700', marginLeft: 10, letterSpacing: -0.3 },
 
-  subHeader: { paddingHorizontal: 20, paddingBottom: 15, borderBottomWidth: 1, borderBottomColor: theme.border },
+  subHeader: { paddingHorizontal: 20, paddingBottom: 15, borderBottomWidth: 1, borderBottomColor: theme.border, zIndex: 10, ...Platform.select({ web: { position: 'relative' }, default: {} }) },
   tabContainer: { flexDirection: 'row', backgroundColor: theme.card, borderRadius: 24, padding: 6, borderWidth: 1, borderColor: theme.border, justifyContent: 'space-between', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 5 },
   tab: { flex: 1, paddingVertical: 12, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   activeTab: { backgroundColor: 'rgba(16, 185, 129, 0.1)' },

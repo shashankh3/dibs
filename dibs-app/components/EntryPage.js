@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, FlatList, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../ThemeContext';
 import * as Haptics from 'expo-haptics';
 
-const { width, height } = Dimensions.get('window');
+const windowDimensions = Dimensions.get('window');
+const width = Platform.OS === 'web' ? Math.min(windowDimensions.width, 400) : windowDimensions.width;
+const height = Platform.OS === 'web' ? Math.min(windowDimensions.height, 850) : windowDimensions.height;
 
 const slides = [
   {
@@ -48,7 +50,9 @@ export default function EntryPage({ onEnter }) {
   const handleNext = () => {
     Haptics.selectionAsync();
     if (currentIndex < slides.length - 1) {
-      flatListRef.current.scrollToIndex({ index: currentIndex + 1, animated: true });
+      const nextIndex = currentIndex + 1;
+      flatListRef.current.scrollToOffset({ offset: nextIndex * width, animated: true });
+      setCurrentIndex(nextIndex);
     }
   };
 

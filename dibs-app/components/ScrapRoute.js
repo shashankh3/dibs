@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Keyboard, Modal, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Keyboard, Modal, Image, Alert, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Feather } from '@expo/vector-icons';
 import { useLanguage } from '../LanguageContext';
 import { useTheme } from '../ThemeContext';
 import { getPincodeCoords } from '../utils/locationUtils';
+
+const Iframe = Platform.OS === 'web' ? React.forwardRef((props, ref) => React.createElement('iframe', { ...props, ref })) : () => null;
+
 export default function ScrapRoute({ items = [] }) {
   const { t } = useLanguage();
   const { theme, isDarkMode } = useTheme(); // Pull the theme engine
@@ -14,6 +17,17 @@ export default function ScrapRoute({ items = [] }) {
   const [activeZone, setActiveZone] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const listener = (event) => {
+      if (webViewRef.current && event.source === webViewRef.current.contentWindow) {
+        handleMessage({ nativeEvent: { data: event.data } });
+      }
+    };
+    window.addEventListener('message', listener);
+    return () => window.removeEventListener('message', listener);
+  }, []);
 
   const styles = getStyles(theme);
 
@@ -74,14 +88,24 @@ export default function ScrapRoute({ items = [] }) {
           if (item.status === 'sold') markerClass = 'marker-sold';
           const icon = L.divIcon({ className: 'custom-marker ' + markerClass, iconSize: [20, 20] });
           const marker = L.marker([item.lat, item.lng], { icon });
-          marker.on('click', () => window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'MARKER_CLICK', id: item.id })));
+          marker.on('click', () => {
+            const msg = JSON.stringify({ type: 'MARKER_CLICK', id: item.id });
+            if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(msg);
+            else window.parent.postMessage(msg, '*');
+          });
           window.markerLayer.addLayer(marker);
         });
         return true;
       })();
       true;
     `;
-    webViewRef.current.injectJavaScript(script);
+    if (Platform.OS === 'web') {
+      if (webViewRef.current.contentWindow) {
+        webViewRef.current.contentWindow.postMessage(JSON.stringify({ type: 'EVAL', script }), '*');
+      }
+    } else {
+      webViewRef.current.injectJavaScript(script);
+    }
   }, [allMapItems]);
 
   React.useEffect(() => {
@@ -90,7 +114,23 @@ export default function ScrapRoute({ items = [] }) {
 
   const handleSearch = () => {
     Keyboard.dismiss();
-    const zone = dynamicZones[searchPin.trim()];
+    const pin = searchPin.trim();
+    if (!pin) return;
+
+    let zone = dynamicZones[pin];
+
+    if (!zone && pin.length >= 4) {
+      const coords = getPincodeCoords(pin);
+      zone = {
+        code: pin,
+        lat: coords[0],
+        lng: coords[1],
+        weight: 0,
+        bounds: [[coords[0] - 0.02, coords[1] - 0.02], [coords[0] + 0.02, coords[1] + 0.02]],
+        items: []
+      };
+    }
+
     if (zone && webViewRef.current) {
       setActiveZone(zone);
       const script = `
@@ -103,9 +143,15 @@ export default function ScrapRoute({ items = [] }) {
         }
         true;
       `;
-      webViewRef.current.injectJavaScript(script);
+      if (Platform.OS === 'web') {
+        if (webViewRef.current.contentWindow) {
+          webViewRef.current.contentWindow.postMessage(JSON.stringify({ type: 'EVAL', script }), '*');
+        }
+      } else {
+        webViewRef.current.injectJavaScript(script);
+      }
     } else {
-      Alert.alert("Not Found", "No items found in this pincode.");
+      Alert.alert("Not Found", "Could not find this pincode location.");
       setActiveZone(null);
     }
   };
@@ -160,6 +206,15 @@ export default function ScrapRoute({ items = [] }) {
           // Items are injected dynamically via injectJavaScript after map loads
           window.map = map;
           window.markerLayer = L.layerGroup().addTo(map);
+          
+          window.addEventListener('message', function(e) {
+            try {
+              const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+              if (data && data.type === 'EVAL') {
+                eval(data.script);
+              }
+            } catch(err){}
+          });
         </script>
       </body>
     </html>
@@ -176,20 +231,30 @@ export default function ScrapRoute({ items = [] }) {
           keyboardType="numeric"
           value={searchPin}
           onChangeText={setSearchPin}
+          onSubmitEditing={handleSearch}
         />
         <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
           <Text style={styles.searchButtonText}>{t('search') || 'Search'}</Text>
         </TouchableOpacity>
       </View>
 
-      <WebView
-        ref={webViewRef}
-        source={{ html: mapHtml }}
-        style={styles.webview}
-        onMessage={handleMessage}
-        scrollEnabled={false}
-        onLoadEnd={() => { setMapLoaded(true); injectMarkers(); }}
-      />
+      {Platform.OS === 'web' ? (
+        <Iframe
+          ref={webViewRef}
+          srcDoc={mapHtml}
+          style={{ border: 'none', flex: 1, backgroundColor: theme.background }}
+          onLoad={() => { setMapLoaded(true); injectMarkers(); }}
+        />
+      ) : (
+        <WebView
+          ref={webViewRef}
+          source={{ html: mapHtml }}
+          style={styles.webview}
+          onMessage={handleMessage}
+          scrollEnabled={false}
+          onLoadEnd={() => { setMapLoaded(true); injectMarkers(); }}
+        />
+      )}
 
       {activeZone && (
         <View style={styles.infoBox}>

@@ -1,10 +1,12 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert, Image, Modal, ActivityIndicator } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { WebView } from 'react-native-webview';
 import { useLanguage } from '../LanguageContext';
 import { useTheme } from '../ThemeContext';
+
+const Iframe = Platform.OS === 'web' ? React.forwardRef((props, ref) => React.createElement('iframe', { ...props, ref })) : () => null;
 
 export default function AddItem({ onAddSuccess, onAddItem }) {
   const [title, setTitle] = useState('');
@@ -21,6 +23,21 @@ export default function AddItem({ onAddSuccess, onAddItem }) {
   const [selectedLat, setSelectedLat] = useState(null);
   const [selectedLng, setSelectedLng] = useState(null);
   const [isGeocoding, setIsGeocoding] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const listener = (event) => {
+      // Check if it's our location message format
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data && data.lat && data.lng) {
+          handleMapMessage({ nativeEvent: { data: event.data } });
+        }
+      } catch (e) {}
+    };
+    window.addEventListener('message', listener);
+    return () => window.removeEventListener('message', listener);
+  }, []);
   
   const { t } = useLanguage();
   const { theme } = useTheme();
@@ -195,7 +212,9 @@ export default function AddItem({ onAddSuccess, onAddItem }) {
 
           map.on('move', function() {
             const center = map.getCenter();
-            window.ReactNativeWebView.postMessage(JSON.stringify({ lat: center.lat, lng: center.lng }));
+            const msg = JSON.stringify({ lat: center.lat, lng: center.lng });
+            if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(msg);
+            else window.parent.postMessage(msg, '*');
           });
         </script>
       </body>
@@ -319,12 +338,19 @@ export default function AddItem({ onAddSuccess, onAddItem }) {
             <View style={{ width: 24 }} />
           </View>
           
-          <WebView
-            source={{ html: mapHtml }}
-            style={{ flex: 1 }}
-            onMessage={handleMapMessage}
-            scrollEnabled={false}
-          />
+          {Platform.OS === 'web' ? (
+            <Iframe
+              srcDoc={mapHtml}
+              style={{ border: 'none', flex: 1, backgroundColor: theme.background }}
+            />
+          ) : (
+            <WebView
+              source={{ html: mapHtml }}
+              style={{ flex: 1 }}
+              onMessage={handleMapMessage}
+              scrollEnabled={false}
+            />
+          )}
           
           <View style={styles.modalFooter}>
             <TouchableOpacity style={styles.confirmBtn} onPress={confirmLocation}>
